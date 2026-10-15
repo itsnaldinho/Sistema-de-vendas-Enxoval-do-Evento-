@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#0033A0;--verde:#00853F}
+body{font-family:'Poppins',sans-serif;padding:24px;background:#f0f4f8}
+h3{color:var(--azul);font-weight:700}
+.login-wrapper{min-height:80vh;display:flex;align-items:center;justify-content:center}
+.login-box{background:#fff;border-radius:16px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 10px 34px rgba(0,0,0,.12);text-align:center}
+.login-box h4{color:var(--azul);font-weight:700;margin-bottom:6px}
+.login-box .subtitle{color:#888;font-size:13px;margin-bottom:24px}
+.login-box input{border-radius:8px;margin-bottom:14px;padding:12px}
+.btn-entrar{background:var(--verde);color:#fff;border:none;width:100%;padding:12px;border-radius:8px;font-weight:700}
+.login-erro{color:#d32f2f;font-size:13px;margin-top:10px;min-height:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:20px}
+.card-stat{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 4px 14px rgba(0,0,0,.08);border-left:5px solid var(--azul)}
+.card-stat.verde{border-left-color:var(--verde)}.card-stat.amarelo{border-left-color:#c99a00}
+.card-stat .label{font-size:12px;text-transform:uppercase;color:#888;font-weight:600}
+.card-stat .value{font-size:26px;font-weight:700;color:#222;margin-top:4px}
+.tamanhos{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 4px 14px rgba(0,0,0,.08);margin-bottom:20px;font-size:14px}
+.tamanhos .chip{display:inline-block;background:#e8eefc;color:var(--azul);border-radius:20px;padding:4px 12px;margin:3px 4px 3px 0;font-weight:600;font-size:13px}
+.table-container{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.toolbar-filtros{display:flex;gap:10px;flex-wrap:wrap}
+table{font-size:14px}
+.badge-pendente{background:#fff3cd;color:#856404}.badge-confirmado{background:#d4edda;color:#155724}.badge-cancelado{background:#f8d7da;color:#721c24}
+.btn-confirmar{background:var(--verde);color:#fff;border:none}.btn-confirmar:hover{background:#006b32;color:#fff}
+.btn-cancelar{background:#d32f2f;color:#fff;border:none}.btn-cancelar:hover{background:#a92424;color:#fff}
+.btn-sair{background:none;border:1px solid #ccc;color:#555}
+.footer-contato{margin-top:24px;text-align:center;font-size:13px;color:#777;background:#fff;border-radius:12px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.footer-contato strong{color:var(--azul)}
+.toast{position:fixed;top:20px;right:20px;background:#222;color:#fff;padding:14px 20px;border-radius:10px;font-size:14px;z-index:9999;opacity:0;transform:translateY(-10px);transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}.toast.erro{background:#c62828}.toast.sucesso{background:var(--verde)}
+</style>
+</head>
+<body>
+<div class="login-wrapper" id="loginWrapper">
+  <div class="login-box">
+    <h4>🔒 Painel Administrativo</h4>
+    <p class="subtitle">Enxoval XIV Elobin 2026</p>
+    <input type="text" id="loginUser" class="form-control" placeholder="Usuário" autocomplete="username">
+    <input type="password" id="loginPass" class="form-control" placeholder="Senha" autocomplete="current-password">
+    <button class="btn-entrar" id="btnEntrar" onclick="fazerLogin()">Entrar</button>
+    <div class="login-erro" id="loginErro"></div>
+  </div>
+</div>
+
+<div id="painelAdmin" style="display:none;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">📋 Painel — Enxoval XIV Elobin 2026</h3>
+    <button class="btn btn-sm btn-sair" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="cards">
+    <div class="card-stat"><div class="label">Total de Pedidos</div><div class="value" id="statPedidos">-</div></div>
+    <div class="card-stat verde"><div class="label">Camisas</div><div class="value" id="statCamisas">-</div></div>
+    <div class="card-stat verde"><div class="label">Pares de Meias</div><div class="value" id="statMeias">-</div></div>
+    <div class="card-stat verde"><div class="label">Valor Arrecadado</div><div class="value" id="statValor">-</div></div>
+    <div class="card-stat amarelo"><div class="label">Pix Pendentes</div><div class="value" id="statPendentes">-</div></div>
+  </div>
+
+  <div class="tamanhos"><strong>👕 Camisas por tamanho</strong> <small class="text-muted">(exclui cancelados)</small><br><span id="listaTamanhos">-</span></div>
+
+  <div class="table-container">
+    <div class="toolbar">
+      <div class="toolbar-filtros">
+        <input type="text" id="busca" class="form-control" style="max-width:260px" placeholder="Buscar por nome ou grupo...">
+        <select id="filtroStatus" class="form-select" style="max-width:200px">
+          <option value="">Todos os status</option><option>Pendente</option><option>Confirmado</option><option>Cancelado</option>
+        </select>
+      </div>
+      <button class="btn btn-outline-secondary" onclick="carregarDados()">🔄 Atualizar</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr><th>Data</th><th>Nome</th><th>Telefone</th><th>Grupo</th><th>Itens</th><th>Qtd</th><th>Valor (R$)</th><th>Comprovante</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="tableBody"><tr><td colspan="10" class="text-center">Carregando pedidos...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="footer-contato" id="footerContato">Carregando informações de contato...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let todosPedidos = [];
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+window.onload = function() {
+  if (sessionStorage.getItem('adminLoggedIn') === 'true') mostrarPainel(); else $('loginUser').focus();
+  $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+};
+
+function fazerLogin() {
+  const btn = $('btnEntrar'), erro = $('loginErro');
+  erro.innerText = ''; btn.disabled = true; btn.innerText = 'Verificando...';
+  google.script.run
+    .withSuccessHandler(ok => {
+      btn.disabled = false; btn.innerText = 'Entrar';
+      if (ok) { sessionStorage.setItem('adminLoggedIn', 'true'); mostrarPainel(); } else erro.innerText = 'Usuário ou senha incorretos.';
+    })
+    .withFailureHandler(err => { btn.disabled = false; btn.innerText = 'Entrar'; erro.innerText = 'Erro ao verificar login: ' + err.message; })
+    .checkAdminLogin($('loginUser').value.trim(), $('loginPass').value);
+}
+
+function sair() {
+  sessionStorage.removeItem('adminLoggedIn');
+  $('painelAdmin').style.display = 'none'; $('loginWrapper').style.display = 'flex';
+  $('loginUser').value = ''; $('loginPass').value = '';
+}
+
+function mostrarPainel() {
+  $('loginWrapper').style.display = 'none'; $('painelAdmin').style.display = 'block';
+  carregarDados(); carregarContato();
+}
+
+function mostrarToast(msg, tipo) {
+  const t = $('toast'); t.innerText = msg; t.className = 'toast show' + (tipo ? ' ' + tipo : '');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+function carregarContato() {
+  google.script.run
+    .withSuccessHandler(i => $('footerContato').innerHTML = '<strong>' + esc(i.distrito) + '</strong><br>Contato: ' + esc(i.nome) + ' &bull; ' + esc(i.telefone))
+    .withFailureHandler(() => $('footerContato').innerText = 'Não foi possível carregar as informações de contato.')
+    .getContatoInfo();
+}
+
+function carregarDados() {
+  $('tableBody').innerHTML = '<tr><td colspan="10" class="text-center">Carregando pedidos...</td></tr>';
+  google.script.run
+    .withSuccessHandler(d => { todosPedidos = d; renderResumo(d); renderTable(d); })
+    .withFailureHandler(err => $('tableBody').innerHTML = '<tr><td colspan="10" class="text-center text-danger">Erro ao carregar: ' + esc(err.message) + '</td></tr>')
+    .getAdminData();
+}
+
+// Lê "Camisa M x2 | Camisa Outra: 12 anos x1 | Meia x3"
+function parseItens(texto) {
+  const r = { camisas: {}, meias: 0 };
+  String(texto || '').split(' | ').forEach(p => {
+    let m = p.match(/^Camisa (.+) x(\d+)$/);
+    if (m) r.camisas[m[1]] = (r.camisas[m[1]] || 0) + parseInt(m[2], 10);
+    m = p.match(/^Meia x(\d+)$/);
+    if (m) r.meias += parseInt(m[1], 10);
+  });
+  return r;
+}
+
+function renderResumo(data) {
+  const ativos = data.filter(i => i.status !== 'Cancelado');
+  const tam = {}; let camisas = 0, meias = 0;
+  ativos.forEach(i => {
+    const p = parseItens(i.itens);
+    meias += p.meias;
+    Object.keys(p.camisas).forEach(k => { tam[k] = (tam[k] || 0) + p.camisas[k]; camisas += p.camisas[k]; });
+  });
+  const valor = ativos.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0);
+  $('statPedidos').innerText = data.length;
+  $('statCamisas').innerText = camisas;
+  $('statMeias').innerText = meias;
+  $('statValor').innerText = 'R$ ' + valor.toFixed(2).replace('.', ',');
+  $('statPendentes').innerText = data.filter(i => i.status === 'Pendente').length;
+  const ordem = ['P','M','G','GG','EXG'];
+  const chaves = Object.keys(tam).sort((a, b) => {
+    const ia = ordem.indexOf(a), ib = ordem.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+  });
+  $('listaTamanhos').innerHTML = chaves.length ? chaves.map(k => '<span class="chip">' + esc(k) + ': ' + tam[k] + '</span>').join('') : '-';
+}
+
+function badge(s) { return s === 'Confirmado' ? 'badge-confirmado' : (s === 'Cancelado' ? 'badge-cancelado' : 'badge-pendente'); }
+
+function renderTable(data) {
+  const busca = ($('busca').value || '').toLowerCase(), fs = $('filtroStatus').value;
+  const f = data.filter(i =>
+    (!busca || String(i.nome || '').toLowerCase().indexOf(busca) !== -1 || String(i.grupo || '').toLowerCase().indexOf(busca) !== -1) &&
+    (!fs || i.status === fs));
+  const tb = $('tableBody'); tb.innerHTML = '';
+  if (!f.length) { tb.innerHTML = '<tr><td colspan="10" class="text-center">Nenhum pedido encontrado.</td></tr>'; return; }
+  f.forEach(i => {
+    let acoes = '';
+    if (i.status !== 'Confirmado') acoes += '<button class="btn btn-sm btn-confirmar mb-1" onclick="atualizarStatus(' + i.rowIndex + ",'Confirmado')\">✔ Confirmar</button> ";
+    if (i.status !== 'Cancelado') acoes += '<button class="btn btn-sm btn-cancelar" onclick="atualizarStatus(' + i.rowIndex + ",'Cancelado')\">✖ Cancelar</button>";
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + esc(i.data) + '</td>' +
+      '<td>' + esc(i.nome) + '<br><small class="text-muted">' + esc(i.email) + '</small></td>' +
+      '<td>' + esc(i.telefone) + '</td>' +
+      '<td>' + esc(i.grupo) + '</td>' +
+      '<td>' + esc(i.itens).split(' | ').join('<br>') + '</td>' +
+      '<td>' + esc(i.quantidade) + '</td>' +
+      '<td>R$ ' + (parseFloat(i.valor) || 0).toFixed(2) + '</td>' +
+      '<td><a href="' + esc(i.comprovante) + '" target="_blank" class="btn btn-sm btn-info text-white">Ver Pix</a></td>' +
+      '<td><span class="badge ' + badge(i.status) + '">' + esc(i.status) + '</span></td>' +
+      '<td>' + acoes + '</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function atualizarStatus(row, novo) {
+  google.script.run
+    .withSuccessHandler(r => {
+      if (r.indexOf('Erro') !== -1) mostrarToast(r, 'erro');
+      else { mostrarToast('Status atualizado para "' + novo + '"', 'sucesso'); carregarDados(); }
+    })
+    .withFailureHandler(err => mostrarToast('Erro ao atualizar: ' + err.message, 'erro'))
+    .updateStatus(row, novo);
+}
+
+$('busca').addEventListener('input', () => renderTable(todosPedidos));
+$('filtroStatus').addEventListener('change', () => renderTable(todosPedidos));
+</script>
+</body>
+</html>
