@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedido - Enxoval XIV ELobin 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#0033A0;--verde:#00853F;--amarelo:#FFDF00;--fundo:#f0f4f8;--texto:#333}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+body{background:var(--fundo);color:var(--texto);padding:20px;display:flex;justify-content:center}
+.main{display:flex;background:#fff;max-width:1000px;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+.info{background:linear-gradient(135deg,var(--azul),#0052cc);color:#fff;width:40%;padding:40px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.info img{width:100%;max-width:220px;border-radius:15px;box-shadow:0 8px 20px rgba(0,0,0,.3);margin-bottom:12px;border:4px solid #fff}
+.info h2{font-size:22px;margin:10px 0 15px;font-weight:700;color:var(--amarelo)}
+.preco{background:rgba(255,255,255,.1);padding:15px;border-radius:10px;width:100%;font-size:14px;border-left:4px solid var(--amarelo);text-align:left;margin-top:10px}
+.form{width:60%;padding:40px}
+.titulo{font-size:18px;color:var(--azul);margin:20px 0 15px;border-bottom:2px solid #eee;padding-bottom:5px;font-weight:600}
+.titulo:first-child{margin-top:0}
+.ig{margin-bottom:15px;display:flex;flex-direction:column}
+.row{display:flex;gap:15px}.row .ig{flex:1}
+label{font-size:13px;font-weight:600;color:#555;margin-bottom:5px}
+input,select{padding:12px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#f9f9f9;width:100%}
+input:focus,select:focus{border-color:var(--azul);outline:none;background:#fff;box-shadow:0 0 0 3px rgba(0,51,160,.1)}
+.prazo{background:#fff8e1;color:#7a5b00;border:1px solid #ffe08a;border-left:5px solid #f5b800;padding:12px 15px;border-radius:8px;margin-bottom:20px;font-size:14px;font-weight:600}
+.cd{display:flex;gap:8px;margin-top:10px}.cd div{background:#fff;border-radius:8px;padding:4px 6px;text-align:center;min-width:52px;box-shadow:0 1px 4px rgba(0,0,0,.1)}.cd b{display:block;font-size:17px;line-height:1.2;color:#7a5b00;font-variant-numeric:tabular-nums}.cd small{font-size:9px;font-weight:600;text-transform:uppercase;color:#999}
+.prazo.encerrado{background:#fdecea;color:#a11f1f;border-color:#f5c2c0;border-left-color:#c62828}
+.alert{background:#e8f5e9;color:#2e7d32;padding:12px 15px;border-radius:8px;margin-bottom:15px;font-size:13px;border-left:4px solid #4caf50}
+.linha-camisa{display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
+.linha-camisa .ig{margin-bottom:0}
+.btn-mini{border:none;border-radius:8px;padding:12px 14px;font-weight:700;cursor:pointer;font-size:13px}
+.btn-add{background:#e8eefc;color:var(--azul)}.btn-rem{background:#fdecea;color:#c62828}
+.pix{background:#fdfbf7;border:2px dashed var(--amarelo);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px}
+.pix h3{color:var(--verde);font-size:22px;margin-bottom:6px}
+.pix .resumo{font-size:13px;color:#666;margin-bottom:6px}
+.pix img{width:170px;height:170px;object-fit:contain;margin:12px 0;border-radius:10px}
+.pix .chave{font-family:monospace;background:#eee;padding:5px 10px;border-radius:5px;font-size:14px;word-break:break-all;display:none}
+.pix small{color:#d32f2f;font-weight:600;display:block;margin-top:10px}
+.btn-submit{background:var(--verde);color:#fff;border:none;padding:15px;width:100%;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer}
+.btn-submit:hover{background:#006b32}.btn-submit:disabled{background:#999;cursor:not-allowed}
+#loading{text-align:center;margin-top:15px;font-weight:600;color:var(--azul);display:none}
+@media(max-width:768px){.main{flex-direction:column}.info,.form{width:100%;padding:25px}.row{flex-direction:column;gap:0}}
+.overlay{position:fixed;inset:0;background:rgba(0,20,60,.55);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .25s;padding:20px}
+.overlay.show{opacity:1;pointer-events:all}
+.mbox{background:#fff;border-radius:18px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.micon{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:32px;font-weight:700}
+.micon.success{background:#e8f5e9;color:var(--verde)}.micon.error{background:#fdecea;color:#c62828}.micon.warning{background:#fff8e1;color:#c99a00}
+.mtitle{font-size:19px;font-weight:700;margin-bottom:10px;color:#222}
+.mmsg{font-size:14px;color:#555;margin-bottom:24px;line-height:1.6}
+.mbtn{background:var(--verde);color:#fff;border:none;padding:13px 32px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
+.mbtn.error{background:#c62828}
+</style>
+</head>
+<body>
+<div class="main">
+  <div class="info">
+    <img id="imgCamisa" alt="Camisa XIV ELobin" style="display:none">
+    <img id="imgMeia" alt="Meias XIV ELobin" style="display:none">
+    <h2>Enxoval XIV ELobin 2026</h2>
+    <div class="preco">
+      <strong>🧾 Valores:</strong><br><br>
+      👕 Camisa: <strong>R$ 38,00</strong><br>
+      🧦 Meias: <strong>R$ 14,00</strong><br><br>
+      📍 Retirada pessoalmente (sem frete)<br><br>
+      ⏰ Pedidos somente até <strong class="prazoTxt">19/10/2026</strong>
+    </div>
+  </div>
+
+  <div class="form">
+    <form id="orderForm">
+      <div class="prazo" id="avisoPrazo">⏰ <strong>Atenção:</strong> pedidos somente até <strong class="prazoTxt">19/10/2026</strong>.
+        <div class="cd" id="cd"><div><b id="cdD">--</b><small>Dias</small></div><div><b id="cdH">--</b><small>Horas</small></div><div><b id="cdM">--</b><small>Min</small></div><div><b id="cdS">--</b><small>Seg</small></div></div>
+      </div>
+      <div class="titulo">Dados do Escoteiro/Chefe</div>
+      <div class="ig"><label>Nome Completo</label><input type="text" id="nome" required></div>
+      <div class="row">
+        <div class="ig"><label>E-mail</label><input type="email" id="email" required></div>
+        <div class="ig"><label>WhatsApp (DDD + Número)</label><input type="text" id="telefone" placeholder="(38) 99999-9999" maxlength="15" inputmode="numeric" required></div>
+      </div>
+      <div class="ig"><label>Grupo Escoteiro</label>
+        <select id="grupo" required><option value="" disabled selected>Selecione o grupo...</option></select>
+      </div>
+
+      <div class="titulo">Camisas — R$ 38,00 cada</div>
+      <div id="camisas"></div>
+      <button type="button" class="btn-mini btn-add" id="addCamisa">+ Adicionar outra camisa</button>
+
+      <div class="titulo">Meias — R$ 14,00 cada</div>
+      <div class="ig" style="max-width:160px"><label>Quantidade de pares</label><input type="number" id="meias" min="0" value="0"></div>
+
+      <div class="alert">📍 <strong>Retirada pessoalmente.</strong> Avisaremos o local e a data após a confirmação do pagamento.</div>
+
+      <div class="titulo">Pagamento PIX</div>
+      <div class="pix">
+        <h3 id="displayTotal">Total: R$ 0,00</h3>
+        <div class="resumo" id="displayResumo">Nenhum item selecionado</div>
+        <img id="imgPix" alt="QR Code Pix" style="display:none">
+        <div class="chave" id="chavePix"></div>
+        <small>⚠️ IMPORTANTE: Identifique o PIX com seu nome e grupo</small>
+      </div>
+
+      <div class="ig"><label>Anexar Comprovante do PIX (Imagem ou PDF)</label>
+        <input type="file" id="comprovante" accept="image/*,.pdf" style="background:#fff" required></div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">Concluir Pedido</button>
+      <div id="loading">⏳ Processando e enviando pedido... Aguarde.</div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="modal"><div class="mbox">
+  <div class="micon" id="mIcon"></div><div class="mtitle" id="mTitle"></div><div class="mmsg" id="mMsg"></div>
+  <button class="mbtn" id="mBtn" onclick="fecharModal()">OK</button>
+</div></div>
+
+<script>
+const PRECO_CAMISA = 38, PRECO_MEIA = 14;
+const TAMANHOS = ['P','M','G','GG','EXG','Outra'];
+const GRUPOS = ['19','92','99','115','140','146','170','179','223'];
+const PIX_CHAVE = ''; // opcional: cole aqui a chave PIX para exibir abaixo do QR Code
+const PRAZO_FINAL = new Date(2026, 9, 19, 23, 59, 59); // mês começa em 0: 9 = outubro
+const PRAZO_TXT = '19/10/2026';
+const encerrado = () => new Date() > PRAZO_FINAL;
+let modalCb = null, total = 0;
+
+function showModal(t, titulo, msg, cb) {
+  document.getElementById('mIcon').className = 'micon ' + t;
+  document.getElementById('mIcon').innerHTML = t === 'success' ? '&#10003;' : (t === 'error' ? '&#10005;' : '&#9888;');
+  document.getElementById('mTitle').innerText = titulo;
+  document.getElementById('mMsg').innerText = msg;
+  document.getElementById('mBtn').className = 'mbtn' + (t === 'error' ? ' error' : '');
+  modalCb = cb || null;
+  document.getElementById('modal').classList.add('show');
+}
+function fecharModal() {
+  document.getElementById('modal').classList.remove('show');
+  if (modalCb) { const c = modalCb; modalCb = null; c(); }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const dddsValidos = [11,12,13,14,15,16,17,18,19,21,22,24,27,28,31,32,33,34,35,37,38,41,42,43,44,45,46,47,48,49,51,53,54,55,61,62,63,64,65,66,67,68,69,71,73,74,75,77,79,81,82,83,84,85,86,87,88,89,91,92,93,94,95,96,97,98,99];
+  const tel = document.getElementById('telefone');
+  const camisasDiv = document.getElementById('camisas');
+  const meiasInp = document.getElementById('meias');
+
+  GRUPOS.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = 'Grupo ' + g; document.getElementById('grupo').appendChild(o); });
+  if (PIX_CHAVE) { const c = document.getElementById('chavePix'); c.textContent = PIX_CHAVE; c.style.display = 'inline-block'; }
+
+  function mascara(v) {
+    v = v.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 7) return '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+    if (v.length > 2) return '(' + v.slice(0,2) + ') ' + v.slice(2);
+    return v.length ? '(' + v : v;
+  }
+  function telOk(v) {
+    const d = v.replace(/\D/g, '');
+    if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    return dddsValidos.indexOf(parseInt(d.substring(0,2),10)) !== -1 && d.charAt(2) === '9';
+  }
+  tel.addEventListener('input', () => tel.value = mascara(tel.value));
+
+  function addCamisa() {
+    const d = document.createElement('div');
+    d.className = 'linha-camisa';
+    d.innerHTML =
+      '<div class="ig" style="flex:1;min-width:110px"><label>Tamanho</label><select class="tam">' +
+      '<option value="">Selecione...</option>' + TAMANHOS.map(t => '<option value="' + t + '">' + (t === 'Outra' ? 'Outra (informar)' : t) + '</option>').join('') + '</select></div>' +
+      '<div class="ig outra" style="flex:1;min-width:110px;display:none"><label>Qual tamanho?</label><input type="text" class="tamOutra" maxlength="30" placeholder="Ex: 14 anos"></div>' +
+      '<div class="ig" style="width:80px"><label>Qtd</label><input type="number" class="qtd" min="1" value="1"></div>' +
+      '<button type="button" class="btn-mini btn-rem">✕</button>';
+    d.querySelector('.tam').addEventListener('change', function() {
+      d.querySelector('.outra').style.display = this.value === 'Outra' ? 'flex' : 'none';
+      calc();
+    });
+    d.querySelector('.qtd').addEventListener('input', calc);
+    d.querySelector('.btn-rem').addEventListener('click', function() {
+      if (camisasDiv.children.length > 1) { d.remove(); } else { d.querySelector('.tam').value = ''; d.querySelector('.qtd').value = 1; d.querySelector('.outra').style.display = 'none'; }
+      calc();
+    });
+    camisasDiv.appendChild(d);
+    calc();
+  }
+
+  function lerCamisas() {
+    const lista = [];
+    camisasDiv.querySelectorAll('.linha-camisa').forEach(l => {
+      let tam = l.querySelector('.tam').value;
+      const qtd = parseInt(l.querySelector('.qtd').value, 10) || 0;
+      if (tam === 'Outra') tam = 'Outra: ' + (l.querySelector('.tamOutra').value.trim() || '?');
+      if (tam && qtd > 0) lista.push({ tamanho: tam, qtd: qtd });
+    });
+    return lista;
+  }
+
+  function calc() {
+    const camisas = lerCamisas();
+    const qc = camisas.reduce((s, c) => s + c.qtd, 0);
+    const qm = parseInt(meiasInp.value, 10) || 0;
+    total = qc * PRECO_CAMISA + qm * PRECO_MEIA;
+    document.getElementById('displayTotal').innerText = 'Total: R$ ' + total.toFixed(2).replace('.', ',');
+    const p = [];
+    if (qc) p.push(qc + ' camisa(s) = R$ ' + (qc * PRECO_CAMISA).toFixed(2).replace('.', ','));
+    if (qm) p.push(qm + ' par(es) de meia = R$ ' + (qm * PRECO_MEIA).toFixed(2).replace('.', ','));
+    document.getElementById('displayResumo').innerText = p.length ? p.join(' + ') : 'Nenhum item selecionado';
+  }
+
+  function reabilitar() { document.getElementById('submitBtn').disabled = encerrado(); document.getElementById('loading').style.display = 'none'; }
+
+  document.getElementById('addCamisa').addEventListener('click', addCamisa);
+  camisasDiv.addEventListener('input', calc);
+  meiasInp.addEventListener('input', calc);
+
+  document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (encerrado()) { showModal('error', 'Pedidos encerrados', 'O prazo para pedidos terminou em ' + PRAZO_TXT + '.'); return; }
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('loading').style.display = 'block';
+
+    // Camisa com tamanho não selecionado
+    let camisaIncompleta = false;
+    camisasDiv.querySelectorAll('.linha-camisa').forEach(l => {
+      const t = l.querySelector('.tam').value, q = parseInt(l.querySelector('.qtd').value, 10) || 0;
+      if (!t && q > 0 && camisasDiv.children.length > 1) camisaIncompleta = true;
+      if (t === 'Outra' && !l.querySelector('.tamOutra').value.trim()) camisaIncompleta = true;
+    });
+    if (camisaIncompleta) { showModal('warning', 'Tamanho da camisa', 'Selecione o tamanho de todas as camisas (ou remova a linha). Se escolheu "Outra", informe o tamanho.'); return reabilitar(); }
+
+    const camisas = lerCamisas(), qm = parseInt(meiasInp.value, 10) || 0;
+    if (camisas.length === 0 && qm === 0) { showModal('warning', 'Pedido vazio', 'Escolha pelo menos uma camisa ou um par de meias.'); return reabilitar(); }
+    if (!telOk(tel.value)) { showModal('warning', 'Telefone inválido', 'Informe um celular válido no formato (DDD) 9XXXX-XXXX.'); return reabilitar(); }
+    const file = document.getElementById('comprovante').files[0];
+    if (!file) { showModal('warning', 'Comprovante necessário', 'Anexe o comprovante do PIX antes de enviar.'); return reabilitar(); }
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const payload = {
+        nome: document.getElementById('nome').value, email: document.getElementById('email').value,
+        telefone: tel.value, grupo: document.getElementById('grupo').value,
+        camisas: camisas, meias: qm,
+        fileData: ev.target.result.split(',')[1], fileMimeType: file.type
+      };
+      google.script.run
+        .withSuccessHandler(function(resp) {
+          reabilitar();
+          if (resp.includes('Erro')) { showModal('error', 'Não foi possível concluir', resp); return; }
+          showModal('success', 'Pedido enviado com sucesso!', 'Sempre Alerta! Você vai receber um e-mail de confirmação com o resumo do pedido.', function() {
+            document.getElementById('orderForm').reset();
+            camisasDiv.innerHTML = ''; addCamisa();
+          });
+        })
+        .withFailureHandler(function(err) { reabilitar(); showModal('error', 'Falha na comunicação', 'Não foi possível enviar seu pedido: ' + err.message); })
+        .processForm(payload);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.querySelectorAll('.prazoTxt').forEach(el => el.innerText = PRAZO_TXT);
+  let timer = null;
+  function encerrar() {
+    if (timer) clearInterval(timer);
+    const av = document.getElementById('avisoPrazo');
+    av.className = 'prazo encerrado';
+    av.innerHTML = '⛔ <strong>Pedidos encerrados.</strong> O prazo terminou em ' + PRAZO_TXT + '.';
+    document.getElementById('submitBtn').disabled = true;
+  }
+  function tick() {
+    const diff = PRAZO_FINAL - new Date();
+    if (diff <= 0) { encerrar(); return; }
+    const s = Math.floor(diff / 1000), p = n => String(n).padStart(2, '0');
+    document.getElementById('cdD').innerText = p(Math.floor(s / 86400));
+    document.getElementById('cdH').innerText = p(Math.floor(s % 86400 / 3600));
+    document.getElementById('cdM').innerText = p(Math.floor(s % 3600 / 60));
+    document.getElementById('cdS').innerText = p(s % 60);
+  }
+  if (encerrado()) { encerrar(); } else { tick(); timer = setInterval(tick, 1000); }
+
+  addCamisa();
+
+  // Carrega as imagens pelo servidor (Drive privado)
+  google.script.run.withSuccessHandler(function(imgs) {
+    [['camisa','imgCamisa'],['meia','imgMeia'],['pix','imgPix']].forEach(function(p) {
+      if (imgs[p[0]]) { const el = document.getElementById(p[1]); el.src = imgs[p[0]]; el.style.display = 'block'; }
+    });
+  }).getImagens();
+});
+</script>
+</body>
+</html>
